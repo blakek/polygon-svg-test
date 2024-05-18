@@ -10,6 +10,8 @@ export default function App() {
   const [color, setColor] = React.useState("#ff69b4");
   const [showBoundingBox, setShowBoundingBox] = React.useState(true);
   const [shouldShowInPolygon, setShouldShowInPolygon] = React.useState(true);
+  const [shouldHighlightLastPoint, setShouldHighlightLastPoint] =
+    React.useState(true);
   const [tolerance, setTolerance] = React.useState(
     // Just so you can see the tolerance area…
     // Normally, you'd use something like `Number.EPSILON`
@@ -34,6 +36,7 @@ export default function App() {
 
   const isUndoDisabled = points.length === 0;
   const isRedoDisabled = undoHistory.length === 0;
+  const lastPoint = points[points.length - 1];
 
   return (
     <div className="app">
@@ -62,7 +65,7 @@ export default function App() {
             log("polygon", pointsAsObject);
           }}
         >
-          log {"{}"}
+          {"log {}"}
         </button>
 
         <input
@@ -90,6 +93,17 @@ export default function App() {
         </label>
 
         <label>
+          <input
+            checked={shouldHighlightLastPoint}
+            onChange={(event) =>
+              setShouldHighlightLastPoint(event.target.checked)
+            }
+            type="checkbox"
+          />
+          highlight last point
+        </label>
+
+        <label>
           Tolerance:
           <input
             onChange={(event) => setTolerance(event.target.valueAsNumber)}
@@ -111,6 +125,22 @@ export default function App() {
 
       <svg className="clickArea" onClick={handleClick}>
         <Polygon points={points} />
+        {shouldHighlightLastPoint && (
+          <circle
+            cx={lastPoint?.[0]}
+            cy={lastPoint?.[1]}
+            r="5"
+            fill="var(--accent-color)"
+            fillOpacity="0.5"
+          >
+            <animate
+              attributeName="r"
+              values="5; 10; 5"
+              dur="1s"
+              repeatCount="indefinite"
+            />
+          </circle>
+        )}
       </svg>
     </div>
   );
