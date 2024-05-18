@@ -1,16 +1,6 @@
 export type Point = [number, number];
 export type Polygon = Point[];
 
-export type IsPointInPolygonOptions = {
-  /**
-   * If provided, a point on the polygon's edge or within this distance of the
-   * edge will be considered inside the polygon. This also helps with rounding
-   * errors.
-   */
-  tolerance?: number;
-};
-
-const BOUNDING_BOX_CHECK_TOLERANCE = Number.EPSILON * 100;
 const POLYGON_MINIMUM_POINTS = 3;
 
 export function arePointsEqual(point1: Point, point2: Point): boolean {
@@ -53,10 +43,8 @@ export const pointToString = ([x, y]: Point): string => `(${x}, ${y})`;
 
 export function getMinMaxXY(
   polygon: Polygon,
-  options: IsPointInPolygonOptions = {}
+  tolerance = 0
 ): [minX: number, minY: number, maxX: number, maxY: number] {
-  const { tolerance = BOUNDING_BOX_CHECK_TOLERANCE } = options;
-
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -88,11 +76,8 @@ export function getMinMaxXY(
   return [minX, minY, maxX, maxY];
 }
 
-export function getBoundingBox(
-  polygon: Polygon,
-  options: IsPointInPolygonOptions = {}
-): Polygon {
-  const [minX, minY, maxX, maxY] = getMinMaxXY(polygon, options);
+export function getBoundingBox(polygon: Polygon, tolerance = 0): Polygon {
+  const [minX, minY, maxX, maxY] = getMinMaxXY(polygon, tolerance);
 
   return [
     [minX, minY],
@@ -127,10 +112,8 @@ export function doesPointIntersectLine(
 export function doesPointIntersectLine_v2b(
   [x, y]: Point,
   [[x1, y1], [x2, y2]]: [Point, Point],
-  options: IsPointInPolygonOptions
+  tolerance = 0
 ): boolean {
-  const { tolerance = 0 } = options;
-
   const minY = Math.min(y1, y2);
   const maxY = Math.max(y1, y2);
 
@@ -149,10 +132,8 @@ export function doesPointIntersectLine_v2b(
 export function doesPointIntersectLine_v3a(
   [x, y]: Point,
   [[x1, y1], [x2, y2]]: [Point, Point],
-  options: IsPointInPolygonOptions = {}
+  tolerance = Number.EPSILON
 ): boolean {
-  const { tolerance = Number.EPSILON } = options;
-
   const a = (x2 - x1) * (y - y1) - (x - x1) * (y2 - y1);
   const intersects = Math.abs(a) <= tolerance;
 
@@ -195,9 +176,9 @@ export function doesPointIntersectLine_v2(
 export function isPointInBoundingBox(
   polygon: Polygon,
   point: Point,
-  options: IsPointInPolygonOptions = {}
+  tolerance = 0
 ): boolean {
-  const [minX, minY, maxX, maxY] = getMinMaxXY(polygon, options);
+  const [minX, minY, maxX, maxY] = getMinMaxXY(polygon, tolerance);
 
   return (
     point[0] >= minX && point[0] <= maxX && point[1] >= minY && point[1] <= maxY
@@ -207,7 +188,12 @@ export function isPointInBoundingBox(
 export function isPointInPolygon(
   polygon: Polygon,
   point: Point,
-  options: Partial<IsPointInPolygonOptions> = {}
+  /**
+   * If provided, a point on the polygon's edge or within this distance of the
+   * edge will be considered inside the polygon. This also helps with rounding
+   * errors.
+   */
+  tolerance = 0
 ): [isInPolygon: boolean, reason?: string] {
   // Point cannot be inside a polygon with less than 3 points
   if (polygon.length < POLYGON_MINIMUM_POINTS) {
@@ -215,7 +201,7 @@ export function isPointInPolygon(
   }
 
   // Optimization: First check if the point is within the bounding box.
-  const isInBoundingBox = isPointInBoundingBox(polygon, point, options);
+  const isInBoundingBox = isPointInBoundingBox(polygon, point, tolerance);
 
   if (!isInBoundingBox) {
     return [false, "outside bounding box"];
