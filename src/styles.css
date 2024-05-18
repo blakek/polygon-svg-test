@@ -1,0 +1,108 @@
+:root {
+  --bg-color: #000;
+  --fg-color: #fff;
+  --accent-color: #ff69b4;
+  --action-padding: 0.25em 0.5em;
+}
+
+html {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-size: 16px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--fg-color);
+  margin: 0;
+}
+
+label:has(input) {
+  align-items: center;
+  display: flex;
+  gap: 0.25em;
+}
+
+.actionArea {
+  align-items: center;
+  background-color: var(--bg-color);
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.2em, 0.5vw, 0.6em);
+  position: absolute;
+  width: 100%;
+}
+
+.actionArea :is(button, input, label) {
+  background-color: #fff2;
+  border-radius: 0.5em;
+  border: 0;
+  color: #fffc;
+  font-size: inherit;
+  padding: var(--action-padding);
+  z-index: 1;
+}
+
+.actionArea :is(button, input, label):disabled {
+  color: #fff4;
+}
+
+.actionArea :is(button, input, label):hover {
+  background-color: #fff3;
+}
+
+.app {
+  background-image: radial-gradient(var(--fg-color) 0.5px, transparent 0);
+  background-size: 20px 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  width: 100vw;
+  z-index: 0;
+}
+
+.clickArea,
+.boundingBox {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.clickArea .polygon {
+  fill-opacity: 0.1;
+  fill: var(--accent-color);
+  stroke-width: 1px;
+  stroke: var(--accent-color);
+}
+
+.boundingBox .polygon {
+  fill: transparent;
+  filter: hue-rotate(270deg);
+  stroke-width: 1px;
+  stroke: var(--accent-color);
+}
+
+.outputText {
+  background-color: var(--bg-color);
+  border-radius: 0.5em;
+  bottom: 0.25em;
+  padding: var(--action-padding);
+  position: absolute;
+  right: 0.25em;
+}
+
+.positiveText {
+  color: lightseagreen;
+}
+
+.negativeText {
+  color: lightcoral;
+}
