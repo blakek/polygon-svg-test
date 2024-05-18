@@ -115,7 +115,7 @@ export default function App() {
 
       {showBoundingBox && points.length > 0 && (
         <svg className="boundingBox">
-          <Polygon points={getBoundingBox(points, { tolerance })} />
+          <Polygon points={getBoundingBox(points, tolerance)} />
         </svg>
       )}
 

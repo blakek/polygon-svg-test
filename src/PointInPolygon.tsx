@@ -9,9 +9,11 @@ export interface PointInPolygonProps {
 export function PointInPolygon(props: PointInPolygonProps) {
   const pointerPosition = usePointerPosition();
 
-  const [isInside, reason] = isPointInPolygon(props.polygon, pointerPosition, {
-    tolerance: props.tolerance,
-  });
+  const [isInside, reason] = isPointInPolygon(
+    props.polygon,
+    pointerPosition,
+    props.tolerance
+  );
 
   const innerText = isInside ? "inside" : "outside";
   const innerTextClass = isInside ? "positiveText" : "negativeText";
