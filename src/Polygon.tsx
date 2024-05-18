@@ -5,6 +5,10 @@ export interface PolygonProps {
 }
 
 export function Polygon(props: PolygonProps) {
+  if (props.points.length === 0) {
+    return null;
+  }
+
   const polygonPoints = props.points.map(([x, y]) => `${x},${y}`).join(" ");
   const polygonPath = `M${polygonPoints}Z`;
 
