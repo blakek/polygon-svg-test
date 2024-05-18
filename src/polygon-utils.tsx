@@ -192,6 +192,18 @@ export function doesPointIntersectLine_v2(
   return x < lineIntersect;
 }
 
+export function isPointInBoundingBox(
+  polygon: Polygon,
+  point: Point,
+  options: IsPointInPolygonOptions = {}
+): boolean {
+  const [minX, minY, maxX, maxY] = getMinMaxXY(polygon, options);
+
+  return (
+    point[0] >= minX && point[0] <= maxX && point[1] >= minY && point[1] <= maxY
+  );
+}
+
 export function isPointInPolygon(
   polygon: Polygon,
   point: Point,
@@ -203,13 +215,7 @@ export function isPointInPolygon(
   }
 
   // Optimization: First check if the point is within the bounding box.
-  const [minX, minY, maxX, maxY] = getMinMaxXY(polygon, options);
-
-  const isInBoundingBox =
-    point[0] >= minX &&
-    point[0] <= maxX &&
-    point[1] >= minY &&
-    point[1] <= maxY;
+  const isInBoundingBox = isPointInBoundingBox(polygon, point, options);
 
   if (!isInBoundingBox) {
     return [false, "outside bounding box"];
