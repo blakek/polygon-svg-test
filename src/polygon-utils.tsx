@@ -10,7 +10,6 @@ export type IsPointInPolygonOptions = {
   tolerance?: number;
 };
 
-const BOUNDING_BOX_CHECK_MINIMUM_POINTS = 5; // TODO: increase this to a much higher number
 const BOUNDING_BOX_CHECK_TOLERANCE = Number.EPSILON * 100;
 const POLYGON_MINIMUM_POINTS = 3;
 
@@ -52,10 +51,10 @@ export function arePolygonsEqual(
 
 export const pointToString = ([x, y]: Point): string => `(${x}, ${y})`;
 
-export function getBoundingBox(
+export function getMinMaxXY(
   polygon: Polygon,
   options: IsPointInPolygonOptions = {}
-): Polygon {
+): [minX: number, minY: number, maxX: number, maxY: number] {
   const { tolerance = BOUNDING_BOX_CHECK_TOLERANCE } = options;
 
   let minX = Infinity;
@@ -85,6 +84,15 @@ export function getBoundingBox(
   minY -= tolerance;
   maxX += tolerance;
   maxY += tolerance;
+
+  return [minX, minY, maxX, maxY];
+}
+
+export function getBoundingBox(
+  polygon: Polygon,
+  options: IsPointInPolygonOptions = {}
+): Polygon {
+  const [minX, minY, maxX, maxY] = getMinMaxXY(polygon, options);
 
   return [
     [minX, minY],
@@ -194,18 +202,17 @@ export function isPointInPolygon(
     return [false, "not a polygon"];
   }
 
-  // Optimization: For large polygons, first check if the point is within the bounding box
-  if (polygon.length >= BOUNDING_BOX_CHECK_MINIMUM_POINTS) {
-    const boundingBox = getBoundingBox(polygon, options);
-    const tolerance = options.tolerance || BOUNDING_BOX_CHECK_TOLERANCE;
+  // Optimization: First check if the point is within the bounding box.
+  const [minX, minY, maxX, maxY] = getMinMaxXY(polygon, options);
 
-    const [isInBoundingBox] = isPointInPolygon(boundingBox, point, {
-      tolerance,
-    });
+  const isInBoundingBox =
+    point[0] >= minX &&
+    point[0] <= maxX &&
+    point[1] >= minY &&
+    point[1] <= maxY;
 
-    if (!isInBoundingBox) {
-      return [false, "outside bounding box"];
-    }
+  if (!isInBoundingBox) {
+    return [false, "outside bounding box"];
   }
 
   const isInside = polygon.reduce(
@@ -226,12 +233,7 @@ export function isPointInPolygon(
     false
   );
 
-  return [
-    isInside,
-    polygon.length < BOUNDING_BOX_CHECK_MINIMUM_POINTS
-      ? "skipped bounding box check for small polygon"
-      : undefined,
-  ];
+  return [isInside];
 }
 
 export function isValidPoint(maybePoint: unknown): maybePoint is Point {
