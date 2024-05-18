@@ -199,7 +199,11 @@ export function isPointInPolygon(
     const boundingBox = getBoundingBox(polygon);
     const tolerance = options.tolerance || BOUNDING_BOX_CHECK_TOLERANCE;
 
-    if (!isPointInPolygon(boundingBox, point, { tolerance })) {
+    const [isInBoundingBox] = isPointInPolygon(boundingBox, point, {
+      tolerance,
+    });
+
+    if (!isInBoundingBox) {
       return [false, "outside bounding box"];
     }
   }
@@ -222,7 +226,12 @@ export function isPointInPolygon(
     false
   );
 
-  return [isInside];
+  return [
+    isInside,
+    polygon.length < BOUNDING_BOX_CHECK_MINIMUM_POINTS
+      ? "skipped bounding box check for small polygon"
+      : undefined,
+  ];
 }
 
 export function isValidPoint(maybePoint: unknown): maybePoint is Point {
