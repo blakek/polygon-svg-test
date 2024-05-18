@@ -196,7 +196,7 @@ export function isPointInPolygon(
 
   // Optimization: For large polygons, first check if the point is within the bounding box
   if (polygon.length >= BOUNDING_BOX_CHECK_MINIMUM_POINTS) {
-    const boundingBox = getBoundingBox(polygon);
+    const boundingBox = getBoundingBox(polygon, options);
     const tolerance = options.tolerance || BOUNDING_BOX_CHECK_TOLERANCE;
 
     const [isInBoundingBox] = isPointInPolygon(boundingBox, point, {
