@@ -1,5 +1,6 @@
 export type Point = [number, number];
 export type Polygon = Point[];
+export type Line = [Point, Point];
 
 const POLYGON_MINIMUM_POINTS = 3;
 
@@ -87,79 +88,9 @@ export function getBoundingBox(polygon: Polygon, tolerance = 0): Polygon {
   ] as Polygon;
 }
 
-// #region untested code
-
-const lookupMap = new Map();
-
 export function doesPointIntersectLine(
   [x, y]: Point,
-  [[x1, y1], [x2, y2]]: [Point, Point]
-): boolean {
-  const lookupKey = [x, y, x1, y1, x2, y2];
-
-  if (!lookupMap.has(lookupKey)) {
-    const isWithinYBounds = y < y1 !== y < y2;
-
-    const lineSlope = (x2 - x1) / (y2 - y1);
-    const verticalDifference = y - y1;
-    const lineIntersect = lineSlope * verticalDifference + x1;
-    lookupMap.set(lookupKey, isWithinYBounds && x < lineIntersect);
-  }
-
-  return lookupMap.get(lookupKey);
-}
-
-export function doesPointIntersectLine_v2b(
-  [x, y]: Point,
-  [[x1, y1], [x2, y2]]: [Point, Point],
-  tolerance = 0
-): boolean {
-  const minY = Math.min(y1, y2);
-  const maxY = Math.max(y1, y2);
-
-  const isWithinYBounds = y > minY - tolerance && y < maxY + tolerance;
-  const n = ((x2 - x1) * (y - y1)) / (y2 - y1) + x1 - x;
-
-  console.log({ n });
-
-  if (!isWithinYBounds) {
-    return false;
-  }
-
-  return n < 0 || Math.abs(n) < tolerance;
-}
-
-export function doesPointIntersectLine_v3a(
-  [x, y]: Point,
-  [[x1, y1], [x2, y2]]: [Point, Point],
-  tolerance = Number.EPSILON
-): boolean {
-  const a = (x2 - x1) * (y - y1) - (x - x1) * (y2 - y1);
-  const intersects = Math.abs(a) <= tolerance;
-
-  console.log({ a, tolerance });
-
-  // const lineSlope = (x2 - x1) / (y2 - y1);
-  // const verticalDifference = y - y1;
-  // const intersects = Math.abs(lineSlope * verticalDifference + x1) <= x;
-
-  const xMin = Math.min(x1, x2);
-  const xMax = Math.max(x1, x2);
-  const yMin = Math.min(y1, y2);
-  const yMax = Math.max(y1, y2);
-
-  return (
-    intersects && true
-    // x >= xMin - tolerance &&
-    // x <= xMax + tolerance &&
-    // y >= yMin - tolerance &&
-    // y <= yMax + tolerance
-  );
-}
-
-export function doesPointIntersectLine_v2(
-  [x, y]: Point,
-  [[x1, y1], [x2, y2]]: [Point, Point]
+  [[x1, y1], [x2, y2]]: Line
 ): boolean {
   const isWithinYBounds = y < y1 !== y < y2;
 
@@ -210,16 +141,18 @@ export function isPointInPolygon(
   const isInside = polygon.reduce(
     (wasLastInside, vertex, pointIndex, polygon) => {
       const previousVertex = polygon.at(pointIndex - 1)!;
-      const intersectsLine = doesPointIntersectLine(
-        point,
-        [vertex, previousVertex]
-        // options
-      );
 
+      const intersectsLine = doesPointIntersectLine(point, [
+        vertex,
+        previousVertex,
+      ]);
+
+      // If we intersect a line, we toggle the inside/outside state
       if (intersectsLine) {
         return !wasLastInside;
       }
 
+      // Keep the same state if we don't intersect the line
       return wasLastInside;
     },
     false
@@ -247,5 +180,3 @@ export function isValidPolygon(maybePolygon: unknown): maybePolygon is Polygon {
 
   return maybePolygon.every((point) => isValidPoint(point));
 }
-
-// #endregion
