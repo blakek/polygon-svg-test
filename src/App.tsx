@@ -113,7 +113,7 @@ export default function App() {
         </label>
       </div>
 
-      {showBoundingBox && (
+      {showBoundingBox && points.length > 0 && (
         <svg className="boundingBox">
           <Polygon points={getBoundingBox(points, { tolerance })} />
         </svg>
@@ -125,10 +125,10 @@ export default function App() {
 
       <svg className="clickArea" onClick={handleClick}>
         <Polygon points={points} />
-        {shouldHighlightLastPoint && (
+        {shouldHighlightLastPoint && lastPoint && (
           <circle
-            cx={lastPoint?.[0]}
-            cy={lastPoint?.[1]}
+            cx={lastPoint[0]}
+            cy={lastPoint[1]}
             r="5"
             fill="var(--accent-color)"
             fillOpacity="0.5"
