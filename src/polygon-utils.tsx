@@ -2,9 +2,11 @@ export type Point = [number, number];
 export type Polygon = Point[];
 
 export type IsPointInPolygonOptions = {
-  /** If provided, a point on the polygon's edge or within this distance of the
+  /**
+   * If provided, a point on the polygon's edge or within this distance of the
    * edge will be considered inside the polygon. This also helps with rounding
-   * errors. */
+   * errors.
+   */
   tolerance?: number;
 };
 
@@ -204,8 +206,8 @@ export function isPointInPolygon(
     const previousVertex = polygon.at(pointIndex - 1)!;
     const intersectsLine = doesPointIntersectLine(
       point,
-      [vertex, previousVertex],
-      options
+      [vertex, previousVertex]
+      // options
     );
 
     if (intersectsLine) {

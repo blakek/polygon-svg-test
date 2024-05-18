@@ -27,6 +27,7 @@ label:has(input) {
   align-items: center;
   display: flex;
   gap: 0.25em;
+  user-select: none;
 }
 
 .actionArea {
