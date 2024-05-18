@@ -50,6 +50,8 @@ export function arePolygonsEqual(
   );
 }
 
+export const pointToString = ([x, y]: Point): string => `(${x}, ${y})`;
+
 export function getBoundingBox(
   polygon: Polygon,
   options: IsPointInPolygonOptions = {}
@@ -186,10 +188,10 @@ export function isPointInPolygon(
   polygon: Polygon,
   point: Point,
   options: Partial<IsPointInPolygonOptions> = {}
-): boolean {
+): [isInPolygon: boolean, reason?: string] {
   // Point cannot be inside a polygon with less than 3 points
   if (polygon.length < POLYGON_MINIMUM_POINTS) {
-    return false;
+    return [false, "not a polygon"];
   }
 
   // Optimization: For large polygons, first check if the point is within the bounding box
@@ -198,24 +200,29 @@ export function isPointInPolygon(
     const tolerance = options.tolerance || BOUNDING_BOX_CHECK_TOLERANCE;
 
     if (!isPointInPolygon(boundingBox, point, { tolerance })) {
-      return false;
+      return [false, "outside bounding box"];
     }
   }
 
-  return polygon.reduce((wasLastInside, vertex, pointIndex, polygon) => {
-    const previousVertex = polygon.at(pointIndex - 1)!;
-    const intersectsLine = doesPointIntersectLine(
-      point,
-      [vertex, previousVertex]
-      // options
-    );
+  const isInside = polygon.reduce(
+    (wasLastInside, vertex, pointIndex, polygon) => {
+      const previousVertex = polygon.at(pointIndex - 1)!;
+      const intersectsLine = doesPointIntersectLine(
+        point,
+        [vertex, previousVertex]
+        // options
+      );
 
-    if (intersectsLine) {
-      return !wasLastInside;
-    }
+      if (intersectsLine) {
+        return !wasLastInside;
+      }
 
-    return wasLastInside;
-  }, false as boolean);
+      return wasLastInside;
+    },
+    false
+  );
+
+  return [isInside];
 }
 
 export function isValidPoint(maybePoint: unknown): maybePoint is Point {
